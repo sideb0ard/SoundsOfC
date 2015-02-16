@@ -27,17 +27,20 @@ typedef struct ball {
   vector_t next;
 }ball;
 
-#define TABLE_SIZE   (147)
 typedef struct
 {
-    //float sine[TABLE_SIZE];
     int freq;
     float *sine;
     int left_phase;
     int right_phase;
     char message[20];
-}
-portAudioData;
+}sinData;
+
+typedef struct
+{
+    float left_phase;
+    float right_phase;
+}sawData;
 
 
 //////////////////////////////////////////////////////////////////
@@ -72,21 +75,54 @@ void draw_borders(WINDOW *screen) {
 
 
 /*
- * This routine is called by portaudio when playback is done.
+ * These routines is called by portaudio when playback is done.
  */
-static void StreamFinished( void* userData )
+static void SinStreamFinished( void* userData )
 {
-   portAudioData *data = (portAudioData *) userData;
+   sinData *data = (sinData *) userData;
+}
+static void SawStreamFinished( void* userData )
+{
+   sawData *data = (sawData *) userData;
 }
 
-
-static int portAudioCallback( const void *inputBuffer, void *outputBuffer,
+static int paSaw( const void *inputBuffer, void *outputBuffer,
                             unsigned long framesPerBuffer,
                             const PaStreamCallbackTimeInfo* timeInfo,
                             PaStreamCallbackFlags statusFlags,
                             void *userData )
 {
-    portAudioData *data = (portAudioData*)userData;
+    sawData *data = (sawData*)userData;
+    float *out = (float*)outputBuffer;
+    unsigned int i;
+
+    (void) timeInfo; /* Prevent unused variable warnings. */
+    (void) statusFlags;
+    (void) inputBuffer;
+
+    for( i=0; i<framesPerBuffer; i++ )
+    {
+        *out++ = data->left_phase;  /* left */
+        *out++ = data->right_phase;  /* right */
+        /* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
+        data->left_phase += 0.01f;
+        /* When signal reaches top, drop back down. */
+        if( data->left_phase >= 1.0f ) data->left_phase -= 2.0f;
+        /* higher pitch so we can distinguish left and right. */
+        data->right_phase += 0.03f;
+        if( data->right_phase >= 1.0f ) data->right_phase -= 2.0f;
+    }
+
+    return 0;
+}
+
+static int paSine( const void *inputBuffer, void *outputBuffer,
+                            unsigned long framesPerBuffer,
+                            const PaStreamCallbackTimeInfo* timeInfo,
+                            PaStreamCallbackFlags statusFlags,
+                            void *userData )
+{
+    sinData *data = (sinData*)userData;
     float *out = (float*)outputBuffer;
     unsigned long i;
 
@@ -107,33 +143,9 @@ static int portAudioCallback( const void *inputBuffer, void *outputBuffer,
     return paContinue;
 }
 
-/// simple version
-//
-void play_sound(void) {
-
-
-  pid_t pID = fork();
-  if (pID >= 0)  // successful
-  {
-    if (pID == 0) // child
-    {
-      // play audio file
-      exit(0);
-    } 
-    else  // parent
-    {
-      return;
-    }
-  } else { // fork failed
-    printf("oofft!");
-    exit(1);
-  }
-}
-
-
 //////////////////////////////////////////////////////////////////
 
-int play_sound2(int freq) {
+int play_saw(PaStreamCallback *funcy) {
 
   pid_t pID = fork();
   if (pID >= 0)  // successful
@@ -143,18 +155,9 @@ int play_sound2(int freq) {
       PaStreamParameters outputParameters;
       PaStream *stream;
       PaError err;
-      portAudioData data;
-      data.freq = freq;
-      data.sine = malloc(freq * sizeof(float));
+      sawData data;
 
-      int i;
-
-      /* initialise sinusoidal wavetable */
-      for( i=0; i<freq; i++ )
-      {
-          data.sine[i] = (float) sin( ((double)i/(double)freq) * M_PI * 2. );
-      }
-      data.left_phase = data.right_phase = 0;
+      data.left_phase = data.right_phase = 0.0;
       
       err = Pa_Initialize();
       if( err != paNoError ) goto error;
@@ -176,12 +179,96 @@ int play_sound2(int freq) {
                 SAMPLE_RATE,
                 FRAMES_PER_BUFFER,
                 paClipOff,      /* we won't output out of range samples so don't bother clipping them */
-                portAudioCallback,
+                //portAudioCallback,
+                //paSine,
+                funcy,
+                &data );
+      if( err != paNoError ) goto error;
+
+      err = Pa_SetStreamFinishedCallback( stream, &SawStreamFinished );
+      if( err != paNoError ) goto error;
+
+      err = Pa_StartStream( stream );
+      if( err != paNoError ) goto error;
+
+      Pa_Sleep( NUM_MSECONDS );
+
+      err = Pa_StopStream( stream );
+      if( err != paNoError ) goto error;
+
+      err = Pa_CloseStream( stream );
+      if( err != paNoError ) goto error;
+
+      Pa_Terminate();
+      
+      exit(0);
+error:
+      Pa_Terminate();
+      exit(1);
+    }
+    else // parent
+    {
+      return 0;
+    }
+  }
+  else // failed to fork
+  {
+      printf("ooft!\n");
+      exit(1);
+  }
+}
+
+int play_sin(int freq, PaStreamCallback *funcy) {
+
+  pid_t pID = fork();
+  if (pID >= 0)  // successful
+  {
+    if (pID == 0) // child
+    {
+      PaStreamParameters outputParameters;
+      PaStream *stream;
+      PaError err;
+      sinData data;
+      data.freq = freq;
+      data.sine = malloc(freq * sizeof(float));
+
+      int i;
+
+      /* initialise sinusoidal wavetable */
+      for( i=0; i<freq; i++ )
+      {
+          data.sine[i] = (float) sin( ((double)i/(double)freq) * M_PI * 2. );
+      }
+      data.left_phase = data.right_phase = 0.0;
+      
+      err = Pa_Initialize();
+      if( err != paNoError ) goto error;
+
+      outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+      if (outputParameters.device == paNoDevice) {
+        fprintf(stderr,"Error: No default output device.\n");
+        goto error;
+      }
+      outputParameters.channelCount = 2;       /* stereo output */
+      outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
+      outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
+      outputParameters.hostApiSpecificStreamInfo = NULL;
+
+      err = Pa_OpenStream(
+                &stream,
+                NULL, /* no input */
+                &outputParameters,
+                SAMPLE_RATE,
+                FRAMES_PER_BUFFER,
+                paClipOff,      /* we won't output out of range samples so don't bother clipping them */
+                //portAudioCallback,
+                //paSine,
+                funcy,
                 &data );
       if( err != paNoError ) goto error;
 
       sprintf( data.message, "No Message" );
-      err = Pa_SetStreamFinishedCallback( stream, &StreamFinished );
+      err = Pa_SetStreamFinishedCallback( stream, &SinStreamFinished );
       if( err != paNoError ) goto error;
 
       err = Pa_StartStream( stream );
@@ -249,6 +336,10 @@ int main(int argc, char *argv[])
   draw_borders(field);
   draw_borders(score);
 
+  // sound FUncs
+  // PaStreamCallback *mySineFunc = &paSine; 
+  PaStreamCallback *mySawFunc = &paSaw; 
+
   while(1) {
     getmaxyx(stdscr, new_y, new_x);
     // clear field every time
@@ -286,11 +377,13 @@ int main(int argc, char *argv[])
 
     getmaxyx(field, b.next.y, b.next.x);
     if (b.location.x > (b.next.x - 2) || b.location.x < 1) {
-        play_sound2(b.location.x * b.velocity.y);
+        //play_sin(b.location.x * b.velocity.y, mySawFunc);
+        //play_sin(b.location.x * b.velocity.y, mySawFunc);
+        play_saw(mySawFunc);
         b.velocity.x *= -1;
     }
     if (b.location.y > (b.next.y - 1) || b.location.y < 1) {
-        play_sound2(b.location.y * b.velocity.x);
+        play_saw(mySawFunc);
         b.velocity.y *= -1;
     }
   }
