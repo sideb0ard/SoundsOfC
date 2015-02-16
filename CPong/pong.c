@@ -86,7 +86,7 @@ static void SawStreamFinished( void* userData )
    sawData *data = (sawData *) userData;
 }
 
-static int paSaw( const void *inputBuffer, void *outputBuffer,
+static int SawFunctionCallback( const void *inputBuffer, void *outputBuffer,
                             unsigned long framesPerBuffer,
                             const PaStreamCallbackTimeInfo* timeInfo,
                             PaStreamCallbackFlags statusFlags,
@@ -116,7 +116,7 @@ static int paSaw( const void *inputBuffer, void *outputBuffer,
     return 0;
 }
 
-static int paSine( const void *inputBuffer, void *outputBuffer,
+static int SinFunctionCallback( const void *inputBuffer, void *outputBuffer,
                             unsigned long framesPerBuffer,
                             const PaStreamCallbackTimeInfo* timeInfo,
                             PaStreamCallbackFlags statusFlags,
@@ -145,7 +145,7 @@ static int paSine( const void *inputBuffer, void *outputBuffer,
 
 //////////////////////////////////////////////////////////////////
 
-int play_saw(PaStreamCallback *funcy) {
+int play_saw() {
 
   pid_t pID = fork();
   if (pID >= 0)  // successful
@@ -181,7 +181,7 @@ int play_saw(PaStreamCallback *funcy) {
                 paClipOff,      /* we won't output out of range samples so don't bother clipping them */
                 //portAudioCallback,
                 //paSine,
-                funcy,
+                SawFunctionCallback,
                 &data );
       if( err != paNoError ) goto error;
 
@@ -218,7 +218,7 @@ error:
   }
 }
 
-int play_sin(int freq, PaStreamCallback *funcy) {
+int play_sin(int freq) {
 
   pid_t pID = fork();
   if (pID >= 0)  // successful
@@ -263,7 +263,7 @@ int play_sin(int freq, PaStreamCallback *funcy) {
                 paClipOff,      /* we won't output out of range samples so don't bother clipping them */
                 //portAudioCallback,
                 //paSine,
-                funcy,
+                SinFunctionCallback,
                 &data );
       if( err != paNoError ) goto error;
 
@@ -303,6 +303,21 @@ error:
 
 
 //////////////////////////////////////////////////////////////////
+//
+void update_position(WINDOW *w, ball *b) {
+    getmaxyx(w, b->next.y, b->next.x);
+    if (b->location.x > (b->next.x - 2) || b->location.x < 1) {
+        //play_sin(b.location.x * b.velocity.y, mySawFunc);
+        play_sin(b->location.x + 40);
+        //play_saw(mySawFunc);
+        b->velocity.x *= -1;
+    }
+    if (b->location.y > (b->next.y - 1) || b->location.y < 1) {
+        //play_saw(mySawFunc);
+        play_sin(b->location.y + 30);
+        b->velocity.y *= -1;
+    }
+}
 
 void cleanup(int signal) {
   int status;
@@ -319,6 +334,8 @@ int main(int argc, char *argv[])
 
   // setup bouncing ball
   ball b = {{ 0, 0 }, { 1, 1 }, { 0, 0 }};
+  ball btoo = {{ 1, 1 }, { 2, 1 }, { 0, 0 }};
+  ball btho = {{ 2, 2 }, { 3, 3 }, { 0, 0 }};
 
   // ncurses inittttt, mate?
   initscr();
@@ -335,10 +352,6 @@ int main(int argc, char *argv[])
   // draw borders
   draw_borders(field);
   draw_borders(score);
-
-  // sound FUncs
-  // PaStreamCallback *mySineFunc = &paSine; 
-  PaStreamCallback *mySawFunc = &paSaw; 
 
   while(1) {
     getmaxyx(stdscr, new_y, new_x);
@@ -364,9 +377,17 @@ int main(int argc, char *argv[])
     b.location.x += b.velocity.x;
     b.location.y += b.velocity.y;
 
+    btoo.location.x += btoo.velocity.x;
+    btoo.location.y += btoo.velocity.y;
+
+    btho.location.x += btho.velocity.x;
+    btho.location.y += btho.velocity.y;
+    
     // draw to our windows
     //mvwprintw(field, 1, 1, "Field");
     mvwprintw(field, b.location.y, b.location.x, "o");
+    mvwprintw(field, btoo.location.y, btoo.location.x, "*");
+    mvwprintw(field, btho.location.y, btho.location.x, "$$");
     mvwprintw(score, 1, 1, "Score");
 
     // refresh each win
@@ -375,17 +396,10 @@ int main(int argc, char *argv[])
 
     usleep(DELAY);
 
-    getmaxyx(field, b.next.y, b.next.x);
-    if (b.location.x > (b.next.x - 2) || b.location.x < 1) {
-        //play_sin(b.location.x * b.velocity.y, mySawFunc);
-        //play_sin(b.location.x * b.velocity.y, mySawFunc);
-        play_saw(mySawFunc);
-        b.velocity.x *= -1;
-    }
-    if (b.location.y > (b.next.y - 1) || b.location.y < 1) {
-        play_saw(mySawFunc);
-        b.velocity.y *= -1;
-    }
+    update_position(field, &b);
+    update_position(field, &btoo);
+    update_position(field, &btho);
+
   }
 
   delwin(field);
@@ -394,3 +408,4 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+
