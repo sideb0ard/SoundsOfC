@@ -10,53 +10,56 @@ void cleanup(int signal) {
   while (waitpid((pid_t) (-1), 0, WNOHANG) > 0) {}
 }
 
+void ninit() {
+  // ncurses inittttt, mate?
+  initscr();
+  noecho();
+  curs_set(FALSE);
+}
+
 int main(int argc, char *argv[])
 {
   int parent_x, parent_y, new_x, new_y;
   int score_size = 3;
 
-  int numballs = 1;
-  ball balls[10];
+  int numballs;
+  ball balls[MAX_BALLS];
   if (argc == 2) {
     numballs = atoi(argv[1]);
   } else {
+    numballs = 1;
     // defaults balls is 1
   }
 
-  // TODO: fix this - make array of balls wurk!
-  //for ( int i = 0; i < numballs; i++) {
-  //  balls[i] = {{ i, i}, {i+1,i+1}, {0,0}};
-  //}
+  for ( int i = 0; i < numballs; i++) {
+    balls[i] = (ball) {{ i, i}, {i+1,i+1}, {0,0}};
+  }
 
-
-  // clean up forked zombie children
+  // Setup signal handler for forked-up zombie children
   signal(SIGCHLD, cleanup);
 
-  // setup bouncing ball
-  ball b = {{ 0, 0 }, { 1, 1 }, { 0, 0 }};
-  ball btoo = {{ 1, 1 }, { 2, 1 }, { 0, 0 }};
-  ball btho = {{ 2, 2 }, { 3, 3 }, { 0, 0 }};
-
-  // ncurses inittttt, mate?
-  initscr();
-  noecho();
-  curs_set(FALSE);
+  // ncurses initialize
+  ninit();
 
   // get max window dimensions
   getmaxyx(stdscr, parent_y, parent_x);
-
   // set up intial windows
   WINDOW *field = newwin(parent_y - score_size, parent_x, 0, 0);
   WINDOW *score = newwin(score_size, parent_x, parent_y - score_size, 0);
-
   // draw borders
   draw_borders(field);
   draw_borders(score);
 
-  while(1) {
+  while(1) {     /// MAIN LOOP!
+
     getmaxyx(stdscr, new_y, new_x);
     // clear field every time
     wclear(field);
+
+    //TODO:1
+    // check if window needs resized
+    //resize_if_needed();
+
     if (new_y != parent_y || new_x != parent_x){
       parent_x = new_x;
       parent_y = new_y;
@@ -69,37 +72,37 @@ int main(int argc, char *argv[])
       wclear(score);
 
     }
+
+    //TODO:2 - FOR ALL WINDOWS, REDRAW BORDERS
     // draw borders
     draw_borders(field);
     draw_borders(score);
 
-    // update ball
-    b.location.x += b.velocity.x;
-    b.location.y += b.velocity.y;
+    // update balls
+    for ( int i = 0; i < numballs; i++) {
+      balls[i].location.x += balls[i].velocity.x;
+      balls[i].location.y += balls[i].velocity.y;
+    }
 
-    btoo.location.x += btoo.velocity.x;
-    btoo.location.y += btoo.velocity.y;
-
-    btho.location.x += btho.velocity.x;
-    btho.location.y += btho.velocity.y;
     
-    // draw to our windows
-    //mvwprintw(field, 1, 1, "Field");
-    mvwprintw(field, b.location.y, b.location.x, "o");
-    mvwprintw(field, btoo.location.y, btoo.location.x, "*");
-    mvwprintw(field, btho.location.y, btho.location.x, "$$");
+    // FOR ALL BALLS, DRAW POSITION ON FIELD
+    for ( int i = 0; i < numballs; i++) {
+      mvwprintw(field, balls[i].location.y, balls[i].location.x, "o");
+    }
+    // DRAW SCORE
     mvwprintw(score, 1, 1, "Score");
 
+    //TODO:5 - FOR ALL WINDOWS, REDRAW BORDERS
     // refresh each win
     wrefresh(field);
     wrefresh(score);
 
     usleep(DELAY);
 
-    update_position(field, &b);
-    update_position(field, &btoo);
-    update_position(field, &btho);
-
+    // FOR ALL BALLS, UPDATE POSITION
+    for ( int i = 0; i < numballs; i++) {
+      update_position(field, &balls[i]);
+    }
   }
 
   delwin(field);

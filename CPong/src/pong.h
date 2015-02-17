@@ -4,6 +4,8 @@
 #define SAMPLE_RATE   (44100)
 #define FRAMES_PER_BUFFER  (64)
 
+#define MAX_BALLS 10
+
 #define DELAY 30000
 
 #ifndef M_PI
