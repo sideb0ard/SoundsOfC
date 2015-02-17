@@ -32,15 +32,15 @@ typedef struct sin_data {
 typedef struct vector_t {
   int x;
   int y;
-}vector_t;
+} vector_t;
 
-typedef struct ball {
+typedef struct object {
   vector_t location;
   vector_t velocity;
   vector_t next;
-}ball;
+} object;
 
 
 int play_sin(int freq);
 void draw_borders(WINDOW *screen);
-void update_position(WINDOW *w, ball *b);
+void update_position(WINDOW *w, object *o);

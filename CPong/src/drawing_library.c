@@ -30,7 +30,7 @@ void draw_borders(WINDOW *screen) {
 
 //////////////////////////////////////////////////////////////////
 //
-void update_position(WINDOW *w, ball *b) {
+void update_position(WINDOW *w, object *b) {
     getmaxyx(w, b->next.y, b->next.x);
     if (b->location.x > (b->next.x - 2) || b->location.x < 1) {
         //play_sin(b.location.x * b.velocity.y, mySawFunc);

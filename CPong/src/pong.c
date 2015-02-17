@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
   int score_size = 3;
 
   int numballs;
-  ball balls[MAX_BALLS];
+  object balls[MAX_BALLS];
   if (argc == 2) {
     numballs = atoi(argv[1]);
   } else {
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
   }
 
   for ( int i = 0; i < numballs; i++) {
-    balls[i] = (ball) {{ i, i}, {i+1,i+1}, {0,0}};
+    balls[i] = (object) {{ i, i}, {i+1,i+1}, {0,0}};
   }
 
   // Setup signal handler for forked-up zombie children
@@ -45,16 +45,20 @@ int main(int argc, char *argv[])
   draw_borders(field);
   draw_borders(score);
 
+  int batlocation_x;
+  int batlocation_y;
+  //object bat = {{ parent_y - 7, parent_x / 2}, {1,1}, {0,0}};
+  object bat = {{  parent_x / 2, parent_y - 6}, {1,1}, {0,0}};
+
+
   while(1) {     /// MAIN LOOP!
 
     getmaxyx(stdscr, new_y, new_x);
-    // clear field every time
-    wclear(field);
+    wclear(field);  // clear field every time
 
     //TODO:1
     // check if window needs resized
     //resize_if_needed();
-
     if (new_y != parent_y || new_x != parent_x){
       parent_x = new_x;
       parent_y = new_y;
@@ -79,11 +83,13 @@ int main(int argc, char *argv[])
       balls[i].location.y += balls[i].velocity.y;
     }
 
-    
     // FOR ALL BALLS, DRAW POSITION ON FIELD
     for ( int i = 0; i < numballs; i++) {
       mvwprintw(field, balls[i].location.y, balls[i].location.x, "o");
     }
+    // DRAW BAT
+    //mvwprintw(field, bat.location.y, bat.location.x, "===");
+    mvwprintw(field, bat.location.y, bat.location.x, "=");
     // DRAW SCORE
     mvwprintw(score, 1, 1, "Score");
 
@@ -96,6 +102,10 @@ int main(int argc, char *argv[])
 
     // FOR ALL BALLS, UPDATE POSITION
     for ( int i = 0; i < numballs; i++) {
+      if (balls[i].location.x == bat.location.x && \
+              balls[i].location.y == (bat.location.y + 1)) {
+          balls[i].velocity.y *= -1;
+          }
       update_position(field, &balls[i]);
     }
   }
