@@ -3,8 +3,7 @@ CC = gcc
 RM = rm
 LDFLAGS = -lncurses -lportaudio
 
-SRC = pong.c pa_sin.c pa_saw.c
-OBJ = pong.o pa_sin.o pa_saw.o
+SRC = pong.c pa_sin.c pa_saw.c drawing_library.c
 
 PROG = bin/pong
 SRCDIR = src/

@@ -4,28 +4,11 @@
 #include <unistd.h>
 
 #include "portaudio.h"
-
-#define NUM_MSECONDS   (50)
-#define SAMPLE_RATE   (44100)
-#define FRAMES_PER_BUFFER  (64)
-//
-//#ifndef M_PI
-//#define M_PI  (3.14159265)
-//#endif
-
-typedef struct
-{
-    int freq;
-    float *sine;
-    int left_phase;
-    int right_phase;
-    char message[20];
-} sinData;
-
+#include "pong.h"
 
 static void SinStreamFinished( void* userData )
 {
-   sinData *data = (sinData *) userData;
+   sin_data *data = (sin_data *) userData;
 }
 
 static int SinFunctionCallback( const void *inputBuffer, void *outputBuffer,
@@ -34,7 +17,7 @@ static int SinFunctionCallback( const void *inputBuffer, void *outputBuffer,
                             PaStreamCallbackFlags statusFlags,
                             void *userData )
 {
-    sinData *data = (sinData*)userData;
+    sin_data *data = (sin_data*)userData;
     float *out = (float*)outputBuffer;
     unsigned long i;
 
@@ -65,7 +48,7 @@ int play_sin(int freq) {
       PaStreamParameters outputParameters;
       PaStream *stream;
       PaError err;
-      sinData data;
+      sin_data data;
       data.freq = freq;
       data.sine = malloc(freq * sizeof(float));
 

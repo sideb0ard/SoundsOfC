@@ -4,24 +4,12 @@
 
 #include "portaudio.h"
 
-#define NUM_MSECONDS   (50)
-#define SAMPLE_RATE   (44100)
-#define FRAMES_PER_BUFFER  (64)
-
-//#ifndef M_PI
-//#define M_PI  (3.14159265)
-//#endif
-
-typedef struct
-{
-    float left_phase;
-    float right_phase;
-}sawData;
+#include "pong.h"
 
 
 static void SawStreamFinished( void* userData )
 {
-   sawData *data = (sawData *) userData;
+   saw_data *data = (saw_data *) userData;
 }
 
 static int SawFunctionCallback( const void *inputBuffer, void *outputBuffer,
@@ -30,7 +18,7 @@ static int SawFunctionCallback( const void *inputBuffer, void *outputBuffer,
                             PaStreamCallbackFlags statusFlags,
                             void *userData )
 {
-    sawData *data = (sawData*)userData;
+    saw_data *data = (saw_data*)userData;
     float *out = (float*)outputBuffer;
     unsigned int i;
 
@@ -64,7 +52,7 @@ int play_saw() {
       PaStreamParameters outputParameters;
       PaStream *stream;
       PaError err;
-      sawData data;
+      saw_data data;
 
       data.left_phase = data.right_phase = 0.0;
       
