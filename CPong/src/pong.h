@@ -1,15 +1,19 @@
+#include <math.h>
 #include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#define NUM_MSECONDS   (50)
-#define SAMPLE_RATE   (44100)
-#define FRAMES_PER_BUFFER  (64)
-
-#define MAX_BALLS 10
+#include "portaudio.h"
 
 #define DELAY 30000
+#define FRAMES_PER_BUFFER 64
+#define MAX_BALLS 10
+#define NUM_MSECONDS 50
+#define SAMPLE_RATE 44100
 
 #ifndef M_PI
-#define M_PI  (3.14159265)
+#define M_PI  3.14159265
 #endif
 
 typedef struct saw_data {
