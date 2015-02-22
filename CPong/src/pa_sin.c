@@ -1,4 +1,9 @@
-#include "pong.h"
+#include <ncurses.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <math.h>
+
+#include "pa_sin.h"
 
 static void SinStreamFinished( void* userData )
 {

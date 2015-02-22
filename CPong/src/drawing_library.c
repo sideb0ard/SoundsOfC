@@ -1,4 +1,7 @@
-#include "pong.h"
+#include <ncurses.h>
+#include <sys/time.h>
+
+#include "ball.h"
 
 //////////////////////////////////////////////////////////////////
 
@@ -30,17 +33,17 @@ void draw_borders(WINDOW *screen) {
 
 //////////////////////////////////////////////////////////////////
 //
-void update_position(WINDOW *w, object *b) {
+void update_position(WINDOW *w, Ball *b) {
     getmaxyx(w, b->next.y, b->next.x);
     if (b->location.x > (b->next.x - 2) || b->location.x < 1) {
         //play_sin(b.location.x * b.velocity.y, mySawFunc);
-        play_sin(b->location.x + 140);
+        //play_sin(b->location.x + 140);
         //play_saw(mySawFunc);
         b->velocity.x *= -1;
     }
     if (b->location.y > (b->next.y - 1) || b->location.y < 1) {
         //play_saw(mySawFunc);
-        play_sin((b->location.y * b->location.y % 30) + 130);
+        //play_sin((b->location.y * b->location.y % 30) + 130);
         b->velocity.y *= -1;
     }
 }

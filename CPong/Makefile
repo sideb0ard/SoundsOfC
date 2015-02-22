@@ -1,9 +1,14 @@
 # Makefile
 CC = gcc
 RM = rm
-LDFLAGS = -lncurses -lportaudio
+LDFLAGS = -lncurses 
+LIBDIR = /usr/local/lib
+LIBRARY = $(LIBDIR)/libportaudio.dylib
+CFLAGS=-c -Wall
+#LDFLAGS = -lncurses
 
-SRC = pong.c pa_sin.c pa_saw.c drawing_library.c
+#SRC = pong.c pa_sin.c pa_saw.c drawing_library.c
+SRC = main.c player.c game.c field.c ball.c drawing_library.c pa_sin.c
 
 PROG = bin/pong
 SRCDIR = src/
@@ -17,10 +22,10 @@ COBJ=$(addprefix $(OBJDIR),$(OBJ))
 all: $(CSRC) $(PROG)
 
 $(PROG): $(COBJ)
-	$(CC) $(LDFLAGS) $(COBJ) -o $(PROG)
+	$(CC) $(LDFLAGS) $(COBJ) -o $(PROG) $(LIBRARY)
 
 $(OBJDIR)%.o: $(SRCDIR)%.c
-	$(CC) $< -c -o $@
+	$(CC) -o $@ $< $(CFLAGS) 
 
 clean:
 	$(RM) $(COBJ) $(PROG)

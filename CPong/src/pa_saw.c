@@ -1,4 +1,5 @@
 #include "pong.h"
+#include <ncurses.h>
 
 
 static void SawStreamFinished( void* userData )
