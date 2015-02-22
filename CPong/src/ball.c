@@ -30,13 +30,11 @@ void ball_reset(Ball *ball, Field *field) {
 int ball_move(Ball *ball, Field *field, Player *player) {
   int max_x = 0,
       max_y = 0;
-  //    next_x = ball->location.x + ball->velocity.x,
-  //    next_y = ball->location.y + ball->velocity.y;
 
   int result = BALL_MOVED;
 
-  //int player_y1 = player->location.y,
-  //    player_y2 = player->location.y + player->length;
+  int player_y1 = player->location.y,
+      player_y2 = player->location.y + player->length;
 
   getmaxyx(field->game, max_y, max_x);
 
@@ -48,19 +46,16 @@ int ball_move(Ball *ball, Field *field, Player *player) {
     ball->velocity.y *= -1;
     play_sin((ball->location.y * ball->location.y % 30) + 130);
   }
-  //if (next_y <= 0 || next_y >= max_y) {
-  //  ball->velocity.y *= -1;
-  //} else if (next_x >= max_x) {
-  //  ball->velocity.x *= -1;
-  //} else if (next_x <= 0) {
 
-  //  if (next_y >= player_y1 && next_y <= player_y2) {
-  //    ball->velocity.x *= -1;
-  //    result = BALL_SCORE;
-  //  } else {
-  //    result = BALL_MISS;
-  //  }
-  //}
+  int next_x = ball->location.x + ball->velocity.x,
+      next_y = ball->location.y + ball->velocity.y;
+
+  if (next_y >= player_y1 && next_y <= player_y2) {
+    ball->velocity.x *= -1;
+    result = BALL_SCORE;
+  } else {
+    result = BALL_MISS;
+  }
 
   ball->location.x += ball->velocity.x;
   ball->location.y += ball->velocity.y;

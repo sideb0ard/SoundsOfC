@@ -22,7 +22,7 @@ Game * game_init(struct timeval start_time) {
   Game *game = malloc(sizeof(Game));
 
   Field *field = field_init();
-  Player *player = player_init(field, 10);
+  Player *player = player_init(field, 6);
   Ball *ball = ball_init(field);
 
   game->field       = field;
@@ -67,27 +67,26 @@ void game_tick(Game *game) {
 //    last_event = elapsed;
 //  }
 //
-//  if ((ch = getch()) != ERR) {
-//    if (ch == MOVE_LEFT) {
-//      player_move(game->field, game->player, -1);
-//    }
-//    if (ch == MOVE_RIGHT) {
-//      player_move(game->field, game->player, 1);
-//    }
-//  }
-//
-//
-//  wclear(game->field->game);
-//
+  if ((ch = getch()) != ERR) {
+    if (ch == MOVE_LEFT) {
+      player_move(game->field, game->player, -3);
+    }
+    if (ch == MOVE_RIGHT) {
+      player_move(game->field, game->player, 3);
+    }
+  }
+
   field_draw_score(game->field, game->player);
   //wrefresh(game->field->game);
   //wrefresh(game->field->score);
-//
-//  player_draw(game->player, game->field);
+
+  player_draw(game->player, game->field);
   ball_draw(game->ball, game->field);
+
   wnoutrefresh(game->field->game);
   wnoutrefresh(game->field->score);
   doupdate();
+  //}
   usleep(BALL_DELAY * MICROSECONDS_PER_SECOND);
 }
 
