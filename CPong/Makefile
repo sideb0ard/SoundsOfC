@@ -2,7 +2,9 @@
 CC = gcc
 RM = rm
 LDFLAGS = -lncurses 
-LIBDIR = /usr/local/lib
+#LIBDIR = /usr/local/lib
+LIBDIR = lib
+#LIBRARY = $(LIBDIR)/libportaudio.a
 LIBRARY = $(LIBDIR)/libportaudio.dylib
 CFLAGS=-c -Wall
 #LDFLAGS = -lncurses
