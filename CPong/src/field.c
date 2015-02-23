@@ -63,6 +63,7 @@ void field_draw_score(Field *field, Player *player) {
     get_midpoints(field->score, &mid_x, &mid_y);
 
     mvwprintw(field->score, 0, (mid_x - 2), "%04d", player->score);
+    //mvwprintw(field->score, 0, (mid_x - 2), "%s", "jobbiebumfart");
 }
 
 void field_destroy(Field *field) {

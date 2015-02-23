@@ -33,7 +33,7 @@ void player_draw(Player *player, Field *field) {
 
     // Draw player's paddle
     for (i = 0; i < player->length; i++) {
-        mvwprintw(field->game, player->location.y, player->location.x + 1, "===");
+        mvwprintw(field->game, player->location.y, player->location.x + i, "=");
     }
 }
 

@@ -22,7 +22,7 @@ Game * game_init(struct timeval start_time) {
   Game *game = malloc(sizeof(Game));
 
   Field *field = field_init();
-  Player *player = player_init(field, 6);
+  Player *player = player_init(field, 8);
   Ball *ball = ball_init(field);
 
   game->field       = field;
@@ -54,35 +54,31 @@ void game_tick(Game *game) {
   mvwprintw(game->field->game, 0, 0, "elapsed" );
   mvwprintw(game->field->score, 0, 0, "Score");
   move_result = ball_move(game->ball, game->field, game->player);
-  //update_position(game->field->game, game->ball); 
 
 
-//
-//    if (move_result == BALL_SCORE) {
-//      game->player->score += 1;
-//    } else if (move_result == BALL_MISS) {
-//      game->player->score = 0;
-//      ball_reset(game->ball, game->field);
-//    }
-//    last_event = elapsed;
-//  }
-//
+  if (move_result == BALL_SCORE) {
+    game->player->score += 1;
+  } else if (move_result == BALL_MISS) {
+    game->player->score = 0;
+    //ball_reset(game->ball, game->field);
+  }
+  //last_event = elapsed;
+
   if ((ch = getch()) != ERR) {
     if (ch == MOVE_LEFT) {
-      player_move(game->field, game->player, -3);
+      player_move(game->field, game->player, -5);
     }
     if (ch == MOVE_RIGHT) {
-      player_move(game->field, game->player, 3);
+      player_move(game->field, game->player, 5);
     }
   }
 
   field_draw_score(game->field, game->player);
-  //wrefresh(game->field->game);
-  //wrefresh(game->field->score);
-
   player_draw(game->player, game->field);
   ball_draw(game->ball, game->field);
 
+  //wrefresh(game->field->game);
+  //wrefresh(game->field->score);
   wnoutrefresh(game->field->game);
   wnoutrefresh(game->field->score);
   doupdate();

@@ -21,9 +21,9 @@ void ball_reset(Ball *ball, Field *field) {
   field_get_midpoints(field, &mid_x, &mid_y);
 
   ball->location.x = mid_x;
-  ball->location.y = mid_y;
+  ball->location.y = 2;
 
-  ball->velocity.x = 2;
+  ball->velocity.x = 1;
   ball->velocity.y = 1;
 }
 
@@ -34,7 +34,8 @@ int ball_move(Ball *ball, Field *field, Player *player) {
   int result = BALL_MOVED;
 
   int player_y1 = player->location.y,
-      player_y2 = player->location.y + player->length;
+      player_x1 = player->location.x,
+      player_x2 = player->location.x + player->length;
 
   getmaxyx(field->game, max_y, max_x);
 
@@ -50,11 +51,13 @@ int ball_move(Ball *ball, Field *field, Player *player) {
   int next_x = ball->location.x + ball->velocity.x,
       next_y = ball->location.y + ball->velocity.y;
 
-  if (next_y >= player_y1 && next_y <= player_y2) {
-    ball->velocity.x *= -1;
-    result = BALL_SCORE;
-  } else {
-    result = BALL_MISS;
+  if (next_y >= player_y1) {
+    if (next_x >= player_x1 && next_x <= player_x2) {
+      ball->velocity.y *= -1;
+      result = BALL_SCORE;
+    } else {
+      result = BALL_MISS;
+    }
   }
 
   ball->location.x += ball->velocity.x;
