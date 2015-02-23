@@ -39,20 +39,12 @@ void game_tick(Game *game) {
   long elapsed = elapsed_since(&game->start_time);
   static long last_event = 0;
 
-  int new_x, new_y;
-
-  //if((elapsed - last_event) >= (BALL_DELAY * MICROSECONDS_PER_SECOND)) {
-    
-  getmaxyx(stdscr, new_y, new_x);
-  wclear(game->field->game);  // clear field every time
-  wclear(game->field->score);  // clear field every time
-
+  field_wclear(game->field);
   field_redraw(game->field);
+
   draw_borders(game->field->game);
   draw_borders(game->field->score);
 
-  mvwprintw(game->field->game, 0, 0, "elapsed" );
-  mvwprintw(game->field->score, 0, 0, "Score");
   move_result = ball_move(game->ball, game->field, game->player);
 
 
@@ -62,7 +54,7 @@ void game_tick(Game *game) {
     game->player->score = 0;
     //ball_reset(game->ball, game->field);
   }
-  //last_event = elapsed;
+  last_event = elapsed;
 
   if ((ch = getch()) != ERR) {
     if (ch == MOVE_LEFT) {

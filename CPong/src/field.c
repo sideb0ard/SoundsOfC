@@ -40,6 +40,11 @@ void field_get_midpoints(Field *field, int *mid_x, int *mid_y) {
     get_midpoints(field->game, mid_x, mid_y);
 }
 
+void field_wclear(Field *field) {
+  wclear(field->game);
+  wclear(field->score);
+}
+
 void field_redraw(Field *field) {
     int container_x = 0,
         container_y = 0,

@@ -4,6 +4,7 @@
 #include "structs.h"
 
 Field * field_init();
+void field_wclear(Field *field);
 void field_redraw(Field *field);
 void field_get_midpoints(Field *field, int *mid_x, int *mid_y);
 void field_draw_score(Field *field, Player *player);

@@ -41,11 +41,11 @@ int ball_move(Ball *ball, Field *field, Player *player) {
 
   if (ball->location.x > (max_x - 2) || ball->location.x < 1) {
     ball->velocity.x *= -1;
-    play_sin(ball->location.x + 140);
+    //play_sin(ball->location.x + 140);
   } 
   if (ball->location.y > (max_y - 2) || ball->location.y < 1) {
     ball->velocity.y *= -1;
-    play_sin((ball->location.y * ball->location.y % 30) + 130);
+    //play_sin((ball->location.y * ball->location.y % 30) + 130);
   }
 
   int next_x = ball->location.x + ball->velocity.x,
@@ -54,6 +54,7 @@ int ball_move(Ball *ball, Field *field, Player *player) {
   if (next_y >= player_y1) {
     if (next_x >= player_x1 && next_x <= player_x2) {
       ball->velocity.y *= -1;
+      play_sin(ball->location.x + 340);
       result = BALL_SCORE;
     } else {
       result = BALL_MISS;
