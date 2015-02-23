@@ -52,15 +52,16 @@ void game_tick(Game *game) {
     game->player->score += 1;
   } else if (move_result == BALL_MISS) {
     game->player->score = 0;
-    //ball_reset(game->ball, game->field);
+    ball_reset(game->ball, game->field);
   }
   last_event = elapsed;
 
   if ((ch = getch()) != ERR) {
-    if (ch == MOVE_LEFT) {
+    //if (ch == MOVE_LEFT) {
+    if (ch == KEY_LEFT) {
       player_move(game->field, game->player, -5);
     }
-    if (ch == MOVE_RIGHT) {
+    if (ch == KEY_RIGHT) {
       player_move(game->field, game->player, 5);
     }
   }
@@ -69,8 +70,6 @@ void game_tick(Game *game) {
   player_draw(game->player, game->field);
   ball_draw(game->ball, game->field);
 
-  //wrefresh(game->field->game);
-  //wrefresh(game->field->score);
   wnoutrefresh(game->field->game);
   wnoutrefresh(game->field->score);
   doupdate();

@@ -12,7 +12,9 @@ Ball *ball_init(Field *field) {
 }
 
 void ball_draw(Ball *ball, Field *field) {
+  wattron(field->game, COLOR_PAIR(1));
   mvwprintw(field->game, ball->location.y, ball->location.x, "o");
+  wattroff(field->game, COLOR_PAIR(1));
 }
 
 void ball_reset(Ball *ball, Field *field) {
@@ -54,7 +56,8 @@ int ball_move(Ball *ball, Field *field, Player *player) {
   if (next_y >= player_y1) {
     if (next_x >= player_x1 && next_x <= player_x2) {
       ball->velocity.y *= -1;
-      play_sin(ball->location.x + 340);
+      //play_sin(ball->location.x + 340);
+      play_sin(440);
       result = BALL_SCORE;
     } else {
       result = BALL_MISS;

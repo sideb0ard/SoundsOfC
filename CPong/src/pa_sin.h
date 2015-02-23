@@ -6,7 +6,7 @@
 
 int play_sin(int freq);
 
-#define FRAMES_PER_BUFFER 64
+#define FRAMES_PER_BUFFER 128
 #define NUM_MSECONDS 50
 #define SAMPLE_RATE 44100
 

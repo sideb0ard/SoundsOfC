@@ -32,9 +32,11 @@ void player_draw(Player *player, Field *field) {
     }
 
     // Draw player's paddle
+    wattron(field->game, COLOR_PAIR(5));
     for (i = 0; i < player->length; i++) {
         mvwprintw(field->game, player->location.y, player->location.x + i, "=");
     }
+    wattroff(field->game, COLOR_PAIR(1));
 }
 
 void player_move(Field *field, Player *player, int direction) {

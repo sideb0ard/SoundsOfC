@@ -11,10 +11,25 @@ Field * field_init() {
 
     // ncurses inittttt, mate?
     initscr();
-    cbreak();
+    cbreak();  
     noecho(); // Don't output the pressed key
+    keypad(stdscr, true); // enable keypad to get arrow keys
     nodelay(stdscr, TRUE); // Don't block on getch() calls
     curs_set(FALSE); // Don't display the cursor on-screen
+    if(has_colors() == FALSE)
+    { endwin();
+      printf("Your terminal does not support color\n");
+      exit(1);
+    }
+    start_color();      /* Start color      */
+    init_pair(1, COLOR_RED,     COLOR_BLACK);
+    init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
+    init_pair(4, COLOR_BLUE,    COLOR_BLACK);
+    init_pair(5, COLOR_CYAN,    COLOR_BLACK);
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(7, COLOR_WHITE,   COLOR_BLACK);
+
 
     getmaxyx(stdscr, max_y, max_x);
 
