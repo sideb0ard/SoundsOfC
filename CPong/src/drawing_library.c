@@ -10,7 +10,7 @@ void draw_borders(WINDOW *screen) {
 
   getmaxyx(screen, y, x);
 
-  wattron(screen, COLOR_PAIR(3));
+  wattron(screen, COLOR_PAIR(2));
 
   // 4cornz
   mvwprintw(screen, 0, 0, "+");

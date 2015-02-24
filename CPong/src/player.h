@@ -6,5 +6,6 @@
 Player * player_init(Field *field, int length);
 void player_draw(Player *player, Field *field);
 void player_move(Field *field, Player *player, int direction);
+void player_reset(Player *player, Field *field);
 
 #endif

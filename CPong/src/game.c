@@ -22,22 +22,26 @@ Game * game_init(struct timeval start_time) {
   Game *game = malloc(sizeof(Game));
 
   Field *field = field_init();
-  Player *player = player_init(field, 8);
+  Player *player = player_init(field, 11);
   Ball *ball = ball_init(field);
 
   game->field       = field;
   game->player      = player;
-  game->ball        = ball;
+  game->balls[0]    = ball;
+  game->num_balls   = 1;
   game->start_time  = start_time;
 
   return game;
 }
 
 void game_tick(Game *game) {
-  int ch = 0, move_result = BALL_MOVED;
+  int ch = 0;
+  int move_results[game->num_balls];
+  for (int i = 0; i <game->num_balls; i++) {
+    move_results[i] = BALL_MOVED;
+  }
 
   long elapsed = elapsed_since(&game->start_time);
-  static long last_event = 0;
 
   field_wclear(game->field);
   field_redraw(game->field);
@@ -45,16 +49,11 @@ void game_tick(Game *game) {
   draw_borders(game->field->game);
   draw_borders(game->field->score);
 
-  move_result = ball_move(game->ball, game->field, game->player);
-
-
-  if (move_result == BALL_SCORE) {
-    game->player->score += 1;
-  } else if (move_result == BALL_MISS) {
-    game->player->score = 0;
-    ball_reset(game->ball, game->field);
+  for (int i = 0; i<game->num_balls; i++) {
+    move_results[i] = ball_move(game->balls[i], \
+        game->field, game->player);
   }
-  last_event = elapsed;
+
 
   if ((ch = getch()) != ERR) {
     //if (ch == MOVE_LEFT) {
@@ -66,9 +65,28 @@ void game_tick(Game *game) {
     }
   }
 
+  for (int i = 0; i<game->num_balls; i++) {
+    if (move_results[i] == BALL_SCORE) {
+      game->player->score += 1;
+    } else if (move_results[i] == BALL_MISS) {
+      //game->player->score = 0;
+      ball_reset(game->balls[i], game->field);
+      //player_reset(game->player, game->field);
+    }
+  }
+
+  //if (game->player->score % 3 == 0) {
+  //  Ball *newball = ball_init(game->field);
+  //  game->balls[game->num_balls] = newball;
+  //  game->num_balls++;
+  //}
+
+
   field_draw_score(game->field, game->player);
   player_draw(game->player, game->field);
-  ball_draw(game->ball, game->field);
+  for (int i = 0; i<game->num_balls; i++) {
+    ball_draw(game->balls[i], game->field);
+  }
 
   wnoutrefresh(game->field->game);
   wnoutrefresh(game->field->score);
@@ -80,6 +98,8 @@ void game_tick(Game *game) {
 void game_destroy(Game *game) {
   field_destroy(game->field);
   free(game->player);
-  free(game->ball);
+  for (int i = 0; i<game->num_balls; i++) {
+    free(game->balls[i]);
+  }
   free(game);
 }

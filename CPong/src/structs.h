@@ -41,7 +41,8 @@ typedef struct Player {
 typedef struct Game {
   Player *player;
   //Ball *balls[10];
-  Ball *ball;
+  Ball *balls[30];
+  int num_balls;
   Field *field;
   struct timeval start_time;
 } Game;
